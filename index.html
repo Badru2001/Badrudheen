@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Swipe App</title>
 
@@ -15,7 +15,6 @@
 body {
     margin: 0;
     padding: 10px;
-    background: #fff;
     font-family: Arial;
 }
 
@@ -28,13 +27,11 @@ body {
     position: relative;
 }
 
-/* SCREENS */
+/* SCREEN */
 .screen {
+    position: absolute;
     width: 100%;
     height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
     display: none;
 }
 
@@ -42,31 +39,11 @@ body {
     display: block;
 }
 
-/* MAIN */
-.main {
-    background: white;
-}
-
 /* PROFILE */
 .profile {
     background: #e5e5e5;
     padding: 20px;
     overflow-y: auto;
-}
-
-/* HEADER */
-.profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.profile img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 1.5px solid black;
-    margin-right: 10px;
 }
 
 /* ROW */
@@ -81,10 +58,9 @@ body {
     cursor: pointer;
 }
 
-/* ICON */
-.icon {
+.row img {
+    width: 25px;
     margin-right: 10px;
-    font-size: 18px;
 }
 
 /* DETAILS */
@@ -92,43 +68,22 @@ body {
     padding: 20px;
 }
 
-/* INPUT */
-input {
+.preview {
     width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid black;
+    height: 200px;
     margin-top: 10px;
+    border-radius: 10px;
 }
 
-/* SAVE BUTTON */
+/* BUTTON */
 button {
-    margin-top: 15px;
-    padding: 10px;
+    margin-top: 10px;
     width: 100%;
+    padding: 10px;
     border-radius: 10px;
     border: none;
     background: black;
     color: white;
-}
-
-/* BOTTOM NAV */
-.nav {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 55px;
-    border-top: 1px solid black;
-    display: flex;
-    background: white;
-}
-
-.nav div {
-    flex: 1;
-    text-align: center;
-    line-height: 55px;
-    font-size: 18px;
-    cursor: pointer;
 }
 </style>
 </head>
@@ -137,58 +92,46 @@ button {
 
 <div class="frame">
 
-<!-- MAIN -->
-<div class="screen main active" id="main"></div>
-
 <!-- PROFILE -->
-<div class="screen profile" id="profile">
-
-<div class="profile-header">
-<img src="https://via.placeholder.com/150">
-<h3>Badrudheen</h3>
-</div>
-
+<div class="screen profile active" id="profile">
 <div id="list"></div>
-
 </div>
 
 <!-- DETAILS -->
 <div class="screen details" id="details">
 <h3 id="title"></h3>
-<input id="input" placeholder="Enter details">
-<button onclick="saveData()">Save</button>
-</div>
 
-<!-- BOTTOM NAV -->
-<div class="nav">
-<div onclick="openScreen('main')">🏠</div>
-<div onclick="openScreen('profile')">👤</div>
+<input type="file" id="fileInput" accept="image/*,application/pdf">
+
+<!-- PREVIEW -->
+<img id="imgPreview" class="preview" style="display:none;">
+<iframe id="pdfPreview" class="preview" style="display:none;"></iframe>
+
+<button onclick="saveFile()">Save</button>
+<button onclick="downloadFile()">Download</button>
+<button onclick="shareFile()">Share</button>
+
 </div>
 
 </div>
 
 <script>
 const items = [
-"Resident ID",
-"Vehicle Registration",
-"Driving License",
-"Passport",
-"Pan Card",
-"Aadhar Card",
-"ANB Bank",
-"NRI",
-"Canara Bank",
-"State Bank"
+"Resident ID","Vehicle Registration","Driving License","Passport",
+"Pan Card","Aadhar Card","ANB Bank","NRI","Canara Bank","State Bank"
 ];
 
-const icons = ["🪪","🚗","🪪","📘","💳","🆔","🏦","🌍","🏦","🏦"];
+const images = [
+"resident.png","vehicle.png","license.png","passport.png",
+"pan.png","aadhar.png","anb.png","nri.png","canara.png","sbi.png"
+];
 
 const list = document.getElementById("list");
 
 items.forEach((item,i)=>{
     const div = document.createElement("div");
     div.className = "row";
-    div.innerHTML = `<span class="icon">${icons[i]}</span>${item}`;
+    div.innerHTML = `<img src="${images[i]}">${item}`;
     div.onclick = ()=>openDetails(item);
     list.appendChild(div);
 });
@@ -199,18 +142,78 @@ function openScreen(id){
 }
 
 let currentKey = "";
+let currentFile = "";
 
 function openDetails(name){
     currentKey = name;
     document.getElementById("title").innerText = name;
-    document.getElementById("input").value = localStorage.getItem(name) || "";
+
+    const saved = localStorage.getItem(name);
+    if(saved){
+        showPreview(saved);
+        currentFile = saved;
+    }
+
     openScreen("details");
 }
 
-function saveData(){
-    const value = document.getElementById("input").value;
-    localStorage.setItem(currentKey, value);
-    alert("Saved!");
+/* FILE INPUT */
+document.getElementById("fileInput").addEventListener("change", function(){
+    const file = this.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+        currentFile = e.target.result;
+        showPreview(currentFile);
+    };
+
+    if(file){
+        reader.readAsDataURL(file);
+    }
+});
+
+/* SHOW PREVIEW */
+function showPreview(data){
+    if(data.includes("application/pdf")){
+        document.getElementById("pdfPreview").style.display = "block";
+        document.getElementById("imgPreview").style.display = "none";
+        document.getElementById("pdfPreview").src = data;
+    } else {
+        document.getElementById("imgPreview").style.display = "block";
+        document.getElementById("pdfPreview").style.display = "none";
+        document.getElementById("imgPreview").src = data;
+    }
+}
+
+/* SAVE */
+function saveFile(){
+    if(currentFile){
+        localStorage.setItem(currentKey, currentFile);
+        alert("Saved!");
+    }
+}
+
+/* DOWNLOAD */
+function downloadFile(){
+    if(!currentFile) return;
+
+    const a = document.createElement("a");
+    a.href = currentFile;
+    a.download = currentKey;
+    a.click();
+}
+
+/* SHARE */
+function shareFile(){
+    if(navigator.share){
+        navigator.share({
+            title: currentKey,
+            text: "My Document",
+            url: currentFile
+        });
+    } else {
+        alert("Sharing not supported on this device");
+    }
 }
 </script>
 
