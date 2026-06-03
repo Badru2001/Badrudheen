@@ -6,27 +6,21 @@
 
 <title>Swipe App</title>
 
-<!-- ✅ APP ICON -->
 <link rel="icon" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 
-<!-- ✅ MOBILE APP SETTINGS -->
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Swipe App">
 
 <style>
 body {
     margin: 0;
     padding: 10px;
     background: #fff;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+    font-family: Arial;
 }
 
-/* OUTER FRAME */
+/* FRAME */
 .frame {
-    width: 100%;
     height: calc(100vh - 20px);
     border: 1.5px solid black;
     border-radius: 38px;
@@ -34,19 +28,18 @@ body {
     position: relative;
 }
 
-/* SLIDER */
-.slider {
-    display: flex;
-    width: 200%;
-    height: 100%;
-    transition: transform 0.3s ease;
-}
-
 /* SCREENS */
 .screen {
     width: 100%;
     height: 100%;
-    flex-shrink: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+.screen.active {
+    display: block;
 }
 
 /* MAIN */
@@ -58,75 +51,167 @@ body {
 .profile {
     background: #e5e5e5;
     padding: 20px;
-    box-sizing: border-box;
+    overflow-y: auto;
 }
 
-/* PROFILE HEADER */
+/* HEADER */
 .profile-header {
     display: flex;
     align-items: center;
+    margin-bottom: 20px;
 }
 
-/* IMAGE */
 .profile img {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     border: 1.5px solid black;
-    object-fit: cover;
-    margin-right: 15px;
+    margin-right: 10px;
 }
 
-/* NAME */
-.profile h2 {
-    font-size: 16px;
-    font-weight: normal;
-    margin: 0;
+/* ROW */
+.row {
+    background: white;
+    padding: 12px;
+    border-radius: 15px;
+    border: 1px solid black;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+/* ICON */
+.icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+/* DETAILS */
+.details {
+    padding: 20px;
+}
+
+/* INPUT */
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+    margin-top: 10px;
+}
+
+/* SAVE BUTTON */
+button {
+    margin-top: 15px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 10px;
+    border: none;
+    background: black;
+    color: white;
+}
+
+/* BOTTOM NAV */
+.nav {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 55px;
+    border-top: 1px solid black;
+    display: flex;
+    background: white;
+}
+
+.nav div {
+    flex: 1;
+    text-align: center;
+    line-height: 55px;
+    font-size: 18px;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="frame" id="app">
-    <div class="slider" id="slider">
+<div class="frame">
 
-        <!-- MAIN -->
-        <div class="screen main"></div>
+<!-- MAIN -->
+<div class="screen main active" id="main"></div>
 
-        <!-- PROFILE -->
-        <div class="screen profile">
-            <div class="profile-header">
-                <img src="https://via.placeholder.com/150">
-                <h2>Badrudheen</h2>
-            </div>
-        </div>
+<!-- PROFILE -->
+<div class="screen profile" id="profile">
 
-    </div>
+<div class="profile-header">
+<img src="https://via.placeholder.com/150">
+<h3>Badrudheen</h3>
+</div>
+
+<div id="list"></div>
+
+</div>
+
+<!-- DETAILS -->
+<div class="screen details" id="details">
+<h3 id="title"></h3>
+<input id="input" placeholder="Enter details">
+<button onclick="saveData()">Save</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+<div onclick="openScreen('main')">🏠</div>
+<div onclick="openScreen('profile')">👤</div>
+</div>
+
 </div>
 
 <script>
-let startX = 0;
-let endX = 0;
+const items = [
+"Resident ID",
+"Vehicle Registration",
+"Driving License",
+"Passport",
+"Pan Card",
+"Aadhar Card",
+"ANB Bank",
+"NRI",
+"Canara Bank",
+"State Bank"
+];
 
-const app = document.getElementById("app");
-const slider = document.getElementById("slider");
+const icons = ["🪪","🚗","🪪","📘","💳","🆔","🏦","🌍","🏦","🏦"];
 
-app.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
+const list = document.getElementById("list");
+
+items.forEach((item,i)=>{
+    const div = document.createElement("div");
+    div.className = "row";
+    div.innerHTML = `<span class="icon">${icons[i]}</span>${item}`;
+    div.onclick = ()=>openDetails(item);
+    list.appendChild(div);
 });
 
-app.addEventListener("touchend", e => {
-    endX = e.changedTouches[0].clientX;
+function openScreen(id){
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+}
 
-    if (startX - endX > 50) {
-        slider.style.transform = "translateX(-100%)";
-    }
+let currentKey = "";
 
-    if (endX - startX > 50) {
-        slider.style.transform = "translateX(0)";
-    }
-});
+function openDetails(name){
+    currentKey = name;
+    document.getElementById("title").innerText = name;
+    document.getElementById("input").value = localStorage.getItem(name) || "";
+    openScreen("details");
+}
+
+function saveData(){
+    const value = document.getElementById("input").value;
+    localStorage.setItem(currentKey, value);
+    alert("Saved!");
+}
 </script>
 
 </body>
