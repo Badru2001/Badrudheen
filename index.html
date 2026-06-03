@@ -1,88 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Notes App</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            padding: 10px;
-            background: #f2f2f2;
-        }
-        h2 {
-            text-align: center;
-        }
-        textarea {
-            width: 100%;
-            height: 100px;
-            font-size: 16px;
-            padding: 10px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-        }
-        .note {
-            background: white;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Swipe App</title>
+
+<style>
+body {
+    margin: 0;
+    padding: 10px;
+    background: #fff;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* OUTER FRAME (iPhone-style curve) */
+.frame {
+    width: 100%;
+    height: calc(100vh - 20px);
+    border: 1.5px solid black;
+
+    /* 👇 iPhone 13 Pro style curve */
+    border-radius: 38px;
+
+    overflow: hidden;
+    position: relative;
+}
+
+/* SLIDER */
+.slider {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+/* SCREENS */
+.screen {
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+/* MAIN */
+.main {
+    background: white;
+}
+
+/* PROFILE */
+.profile {
+    background: #e5e5e5;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* PROFILE HEADER */
+.profile-header {
+    display: flex;
+    align-items: center;
+}
+
+/* IMAGE */
+.profile img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 1.5px solid black;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+/* NAME */
+.profile h2 {
+    font-size: 16px;
+    font-weight: normal;
+    margin: 0;
+}
+</style>
 </head>
 
 <body>
 
-<h2>My Notes</h2>
+<div class="frame" id="app">
+    <div class="slider" id="slider">
 
-<textarea id="noteInput" placeholder="Write your note..."></textarea>
-<button onclick="addNote()">Save Note</button>
+        <!-- MAIN -->
+        <div class="screen main"></div>
 
-<div id="notes"></div>
+        <!-- PROFILE -->
+        <div class="screen profile">
+            <div class="profile-header">
+                <img src="https://via.placeholder.com/150">
+                <h2>Badrudheen</h2>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 <script>
-    function loadNotes() {
-        let notes = JSON.parse(localStorage.getItem("notes")) || [];
-        let notesDiv = document.getElementById("notes");
-        notesDiv.innerHTML = "";
+let startX = 0;
+let endX = 0;
 
-        notes.forEach((note, index) => {
-            notesDiv.innerHTML += `
-                <div class="note">
-                    ${note}
-                    <br>
-                    <button onclick="deleteNote(${index})">Delete</button>
-                </div>
-            `;
-        });
+const app = document.getElementById("app");
+const slider = document.getElementById("slider");
+
+app.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+});
+
+app.addEventListener("touchend", e => {
+    endX = e.changedTouches[0].clientX;
+
+    if (startX - endX > 50) {
+        slider.style.transform = "translateX(-100%)";
     }
 
-    function addNote() {
-        let input = document.getElementById("noteInput");
-        let notes = JSON.parse(localStorage.getItem("notes")) || [];
-
-        if (input.value.trim() !== "") {
-            notes.push(input.value);
-            localStorage.setItem("notes", JSON.stringify(notes));
-            input.value = "";
-            loadNotes();
-        }
+    if (endX - startX > 50) {
+        slider.style.transform = "translateX(0)";
     }
-
-    function deleteNote(index) {
-        let notes = JSON.parse(localStorage.getItem("notes"));
-        notes.splice(index, 1);
-        localStorage.setItem("notes", JSON.stringify(notes));
-        loadNotes();
-    }
-
-    loadNotes();
+});
 </script>
 
 </body>
