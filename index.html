@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3 Column Entry</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 20px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 500px;
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    border: none;
+    text-align: center;
+}
+</style>
+
+</head>
+<body>
+
+<table id="dataTable">
+
+<tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Amount</th>
+</tr>
+
+<tr>
+    <td><input type="text" oninput="checkRow(this)"></td>
+    <td><input type="text"></td>
+    <td><input type="number"></td>
+</tr>
+
+</table>
+
+<script>
+function checkRow(input) {
+    let row = input.parentNode.parentNode;
+    let table = document.getElementById("dataTable");
+
+    // If this is last row → create new row
+    if (row.rowIndex === table.rows.length - 1 && input.value !== "") {
+        let newRow = table.insertRow(-1);
+
+        for (let i = 0; i < 3; i++) {
+            let cell = newRow.insertCell(i);
+            let inp = document.createElement("input");
+
+            if (i === 0) {
+                inp.type = "text";
+                inp.oninput = function() { checkRow(this); };
+            } else if (i === 1) {
+                inp.type = "text";
+            } else {
+                inp.type = "number";
+            }
+
+            cell.appendChild(inp);
+        }
+    }
+}
+</script>
+
+</body>
+</html>
