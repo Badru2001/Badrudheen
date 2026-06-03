@@ -1,78 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>3 Column Entry</title>
-
-<style>
-body {
-    font-family: Arial;
-    margin: 20px;
-}
-
-table {
-    border-collapse: collapse;
-    width: 500px;
-}
-
-th, td {
-    border: 1px solid #000;
-    padding: 6px;
-    text-align: center;
-}
-
-input {
-    width: 100%;
-    border: none;
-    text-align: center;
-}
-</style>
-
+    <title>My Notes App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            padding: 10px;
+            background: #f2f2f2;
+        }
+        h2 {
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            font-size: 16px;
+            padding: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+        }
+        .note {
+            background: white;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
+
 <body>
 
-<table id="dataTable">
+<h2>My Notes</h2>
 
-<tr>
-    <th>Name</th>
-    <th>Description</th>
-    <th>Amount</th>
-</tr>
+<textarea id="noteInput" placeholder="Write your note..."></textarea>
+<button onclick="addNote()">Save Note</button>
 
-<tr>
-    <td><input type="text" oninput="checkRow(this)"></td>
-    <td><input type="text"></td>
-    <td><input type="number"></td>
-</tr>
-
-</table>
+<div id="notes"></div>
 
 <script>
-function checkRow(input) {
-    let row = input.parentNode.parentNode;
-    let table = document.getElementById("dataTable");
+    function loadNotes() {
+        let notes = JSON.parse(localStorage.getItem("notes")) || [];
+        let notesDiv = document.getElementById("notes");
+        notesDiv.innerHTML = "";
 
-    // If this is last row → create new row
-    if (row.rowIndex === table.rows.length - 1 && input.value !== "") {
-        let newRow = table.insertRow(-1);
+        notes.forEach((note, index) => {
+            notesDiv.innerHTML += `
+                <div class="note">
+                    ${note}
+                    <br>
+                    <button onclick="deleteNote(${index})">Delete</button>
+                </div>
+            `;
+        });
+    }
 
-        for (let i = 0; i < 3; i++) {
-            let cell = newRow.insertCell(i);
-            let inp = document.createElement("input");
+    function addNote() {
+        let input = document.getElementById("noteInput");
+        let notes = JSON.parse(localStorage.getItem("notes")) || [];
 
-            if (i === 0) {
-                inp.type = "text";
-                inp.oninput = function() { checkRow(this); };
-            } else if (i === 1) {
-                inp.type = "text";
-            } else {
-                inp.type = "number";
-            }
-
-            cell.appendChild(inp);
+        if (input.value.trim() !== "") {
+            notes.push(input.value);
+            localStorage.setItem("notes", JSON.stringify(notes));
+            input.value = "";
+            loadNotes();
         }
     }
-}
+
+    function deleteNote(index) {
+        let notes = JSON.parse(localStorage.getItem("notes"));
+        notes.splice(index, 1);
+        localStorage.setItem("notes", JSON.stringify(notes));
+        loadNotes();
+    }
+
+    loadNotes();
 </script>
 
 </body>
